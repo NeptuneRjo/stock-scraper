@@ -7,6 +7,7 @@ type Article = {
 	description: string
 	author: string
 	date: string
+	url: string
 }
 
 const scraper = async () => {
@@ -61,6 +62,11 @@ const scraper = async () => {
 		}
 	)
 
+	// returns an empty array if selector is any more specific
+	const urls = await page.$$eval('h2 a', async (urls) => {
+		return urls.map((index) => (index as HTMLLinkElement).href)
+	})
+
 	for (let i = 0; i < articlesLength; i++) {
 		const articleObj = {
 			imageUrl: images[i],
@@ -68,6 +74,7 @@ const scraper = async () => {
 			description: descriptions[i],
 			author: authors[i],
 			date: dates[i],
+			url: urls[i],
 		}
 
 		articlesCollection.push(articleObj)
