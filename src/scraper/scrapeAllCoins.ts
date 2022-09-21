@@ -20,6 +20,7 @@ type Coin = {
 	}
 	circulation: string
 	rank: string
+	url: string
 }
 
 const scraper = async () => {
@@ -106,6 +107,13 @@ const scraper = async () => {
 		return ranks.map((index) => (index as HTMLElement).innerText)
 	})
 
+	const urls = await page.$$eval(
+		'div.sc-16r8icm-0.escjiH a.cmc-link',
+		async (urls) => {
+			return urls.map((index) => (index as HTMLLinkElement).href)
+		}
+	)
+
 	for (let i = 0; i < numberOfCoins; i++) {
 		const coin = {
 			image: images[i],
@@ -126,6 +134,7 @@ const scraper = async () => {
 			},
 			circulation: circulations[i],
 			rank: ranks[i],
+			url: urls[i],
 		}
 
 		coinsCollection.push(coin)
