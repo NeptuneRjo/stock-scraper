@@ -74,6 +74,8 @@ export const scrapeSingleCoin = async (url: string) => {
 		}
 	)
 
+	// the stats use the same selector so they are mapped as an array
+	// market cap -> diluted cap -> volume
 	const stats = await page.$$eval(
 		'div.statsItemRight div.statsValue',
 		async (marketCap) => {
