@@ -32,6 +32,8 @@ const scrapeSingleCoin = async (url) => {
     const priceChange = await page.$eval('span.sc-15yy2pl-0.feeyND', async (price) => {
         return price.innerText;
     });
+    // the stats use the same selector so they are mapped as an array
+    // market cap -> diluted cap -> volume
     const stats = await page.$$eval('div.statsItemRight div.statsValue', async (marketCap) => {
         return marketCap.map((index) => index.innerText);
     });
