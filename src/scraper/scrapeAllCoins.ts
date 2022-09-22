@@ -8,6 +8,11 @@ type Coin = {
 		symbol: string
 	}
 	price: string
+	priceHistory: {
+		hour: string
+		day: string
+		week: string
+	}
 	marketCap: string
 	dayVolume: {
 		USD: string
@@ -56,6 +61,29 @@ export const scrapeAllCoins = async () => {
 		'div.sc-131di3y-0.cLgOOr a.cmc-link span',
 		async (prices) => {
 			return prices.map((index) => (index as HTMLElement).innerText)
+		}
+	)
+
+	const priceChanges = await page.$$eval(
+		'div.h7vnx2-1.bFzXgL table.h7vnx2-2.juYUEZ.cmc-table tbody tr td span.sc-15yy2pl-0',
+		async (changes) => {
+			const priceChanges = changes.map(
+				(index) => (index as HTMLElement).innerText
+			)
+
+			let setsOfThree: string[] = []
+			let priceChangeSets = []
+
+			for (let i = 0; i <= priceChanges.length; i++) {
+				if (setsOfThree.length === 3) {
+					priceChangeSets.push(setsOfThree)
+					setsOfThree = []
+				}
+
+				setsOfThree.push(priceChanges[i])
+			}
+
+			return priceChangeSets
 		}
 	)
 
@@ -109,6 +137,11 @@ export const scrapeAllCoins = async () => {
 				symbol: symbols[i],
 			},
 			price: prices[i],
+			priceHistory: {
+				hour: priceChanges[i][0],
+				day: priceChanges[i][1],
+				week: priceChanges[i][2],
+			},
 			marketCap: marketCaps[i],
 			dayVolume: {
 				USD: dayVolumeUSD[i],
@@ -122,9 +155,8 @@ export const scrapeAllCoins = async () => {
 		coinsCollection.push(coin)
 	}
 
-	fs.writeFile('./src/coins.json', JSON.stringify(coinsCollection))
-
 	await browser.close()
+	return coinsCollection
 }
 
 scrapeAllCoins()
