@@ -1,4 +1,5 @@
 import express from 'express'
+import apiRoutes from './routes/apiRoutes'
 import 'dotenv/config'
 
 const app = express()
@@ -6,7 +7,7 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-app.get('/', (req, res) => res.send('Hello world'))
+app.use('/', apiRoutes)
 
 const port = process.env.PORT || 4000
 
