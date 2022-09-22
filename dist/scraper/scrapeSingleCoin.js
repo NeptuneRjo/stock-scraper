@@ -46,6 +46,9 @@ const scrapeSingleCoin = async (url) => {
     const totalSupply = await page.$eval('div.maxSupplyValue', async (supply) => {
         return supply.innerText;
     });
+    const description = await page.$eval('div.sc-2qtjgt-0.eApVPN div', async (description) => {
+        return description.innerHTML;
+    });
     const coin = {
         image,
         coin: {
@@ -67,6 +70,7 @@ const scrapeSingleCoin = async (url) => {
             total: totalSupply,
         },
         rank,
+        description,
     };
     await promises_1.default.writeFile('coin.json', JSON.stringify(coin));
     await browser.close();
