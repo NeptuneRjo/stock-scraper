@@ -155,8 +155,6 @@ export const scrapeAllCoins = async () => {
 		coinsCollection.push(coin)
 	}
 
-	await fs.writeFile('./src/coins.json', JSON.stringify(coinsCollection))
-
 	await browser.close()
 	return coinsCollection
 }
