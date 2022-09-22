@@ -1,7 +1,5 @@
 import { Request, Response } from 'express'
 import { scrapeAllCoins } from '../scraper/scrapeAllCoins'
-import coins from '../coins.json'
-import fs from 'fs'
 
 export const get_all_coins = async (req: Request, res: Response) => {
 	scrapeAllCoins(100)
