@@ -23,7 +23,7 @@ type Coin = {
 	url: string
 }
 
-export const scrapeAllCoins = async () => {
+export const scrapeAllCoins = async (coinCount: number) => {
 	const browser = await puppeteer.launch()
 	const page = await browser.newPage()
 
@@ -129,7 +129,7 @@ export const scrapeAllCoins = async () => {
 		}
 	)
 
-	for (let i = 0; i < numberOfCoins; i++) {
+	for (let i = 0; i < coinCount; i++) {
 		const coin = {
 			image: images[i],
 			name: {
@@ -159,4 +159,4 @@ export const scrapeAllCoins = async () => {
 	return coinsCollection
 }
 
-scrapeAllCoins()
+scrapeAllCoins(100)
