@@ -22,6 +22,7 @@ type Coin = {
 		total: string
 	}
 	rank: string
+	description: string
 }
 
 export const scrapeSingleCoin = async (url: string) => {
@@ -98,6 +99,13 @@ export const scrapeSingleCoin = async (url: string) => {
 		return (supply as HTMLElement).innerText
 	})
 
+	const description = await page.$eval(
+		'div.sc-2qtjgt-0.eApVPN div',
+		async (description) => {
+			return (description as HTMLElement).innerHTML
+		}
+	)
+
 	const coin = {
 		image,
 		coin: {
@@ -119,6 +127,7 @@ export const scrapeSingleCoin = async (url: string) => {
 			total: totalSupply,
 		},
 		rank,
+		description,
 	}
 	await fs.writeFile('coin.json', JSON.stringify(coin))
 
