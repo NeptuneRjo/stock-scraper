@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer'
-import fs from 'fs/promises'
 
 type Coin = {
 	image: string
