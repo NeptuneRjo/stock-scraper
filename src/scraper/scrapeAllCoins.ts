@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer'
-import fs from 'fs/promises'
 
 type Coin = {
 	image: string
@@ -8,26 +7,30 @@ type Coin = {
 		symbol: string
 	}
 	price: string
-	priceChange: {
-		oneHour: string
-		oneDay: string
-		sevenDays: string
+	priceHistory: {
+		hour: string
+		day: string
+		week: string
 	}
 	marketCap: string
 	dayVolume: {
 		USD: string
 		coin: string
 	}
-	circulation: string
 	rank: string
-	url: string
+	circulation: string
+	id: string
 }
 
-const scraper = async () => {
+export const scrapeAllCoins = async (coinCount: number) => {
 	const browser = await puppeteer.launch()
 	const page = await browser.newPage()
 
 	await page.goto('https://coinmarketcap.com/')
+	await page.setViewport({
+		height: 7750,
+		width: 1440,
+	})
 
 	const coinsCollection: Coin[] = []
 
@@ -39,39 +42,47 @@ const scraper = async () => {
 		return images.map((index) => (index as HTMLImageElement).src)
 	})
 
-	const names = await page.$$eval('p.sc-1eb5slv-0.iworPT', async (names) => {
-		return names.map((index) => (index as HTMLElement).innerText)
-	})
+	const names = await page.$$eval(
+		'a.cmc-link div.sc-16r8icm-0.sc-1teo54s-0.dBKWCw div.sc-16r8icm-0.sc-1teo54s-1.dNOTPP p.sc-1eb5slv-0.iworPT',
+		async (names) => {
+			return names.map((index) => (index as HTMLElement).innerText)
+		}
+	)
 
 	const symbols = await page.$$eval(
-		'p.sc-1eb5slv-0.gGIpIK.coin-item-symbol',
+		'div.sc-16r8icm-0.escjiH a.cmc-link div.sc-16r8icm-0.sc-1teo54s-0.dBKWCw div.sc-16r8icm-0.sc-1teo54s-1.dNOTPP div.sc-1teo54s-2.fZIJcI p.sc-1eb5slv-0.gGIpIK.coin-item-symbol',
 		async (symbols) => {
 			return symbols.map((index) => (index as HTMLElement).innerText)
 		}
 	)
 
-	const prices = await page.$$eval('a.cmc-link span', async (prices) => {
-		return prices.map((index) => (index as HTMLElement).innerText)
-	})
-
-	const priceChange_1hr = await page.$$eval(
-		'span.sc-15yy2pl-0.hzgCfk',
+	const prices = await page.$$eval(
+		'div.sc-131di3y-0.cLgOOr a.cmc-link span',
 		async (prices) => {
 			return prices.map((index) => (index as HTMLElement).innerText)
 		}
 	)
 
-	const priceChange_24hr = await page.$$eval(
-		'span.sc-15yy2pl-0.hzgCfk',
-		async (prrices) => {
-			return prrices.map((index) => (index as HTMLElement).innerText)
-		}
-	)
+	const priceChanges = await page.$$eval(
+		'div.h7vnx2-1.bFzXgL table.h7vnx2-2.juYUEZ.cmc-table tbody tr td span.sc-15yy2pl-0',
+		async (changes) => {
+			const priceChanges = changes.map(
+				(index) => (index as HTMLElement).innerText
+			)
 
-	const priceChange_7d = await page.$$eval(
-		'span.sc-15yy2pl-0.hzgCfk',
-		async (prices) => {
-			return prices.map((index) => (index as HTMLElement).innerText)
+			let setsOfThree: string[] = []
+			let priceChangeSets = []
+
+			for (let i = 0; i <= priceChanges.length; i++) {
+				if (setsOfThree.length === 3) {
+					priceChangeSets.push(setsOfThree)
+					setsOfThree = []
+				}
+
+				setsOfThree.push(priceChanges[i])
+			}
+
+			return priceChangeSets
 		}
 	)
 
@@ -90,7 +101,7 @@ const scraper = async () => {
 	)
 
 	const dayVolumeCoin = await page.$$eval(
-		'p.sc-1eb5slv-0.etpvrL',
+		'div.sc-16r8icm-0.j3nwcd-0.cRcnjD div p.sc-1eb5slv-0.etpvrL',
 		async (volumes) => {
 			return volumes.map((index) => (index as HTMLElement).innerText)
 		}
@@ -103,18 +114,31 @@ const scraper = async () => {
 		}
 	)
 
-	const ranks = await page.$$eval('p.sc-1eb5slv-0.etpvrL', async (ranks) => {
-		return ranks.map((index) => (index as HTMLElement).innerText)
-	})
-
-	const urls = await page.$$eval(
-		'div.sc-16r8icm-0.escjiH a.cmc-link',
-		async (urls) => {
-			return urls.map((index) => (index as HTMLLinkElement).href)
+	const ranks = await page.$$eval(
+		'tbody tr td div.sc-16r8icm-0.escjiH a.cmc-link div.sc-16r8icm-0.sc-1teo54s-0.dBKWCw div.sc-16r8icm-0.sc-1teo54s-1.dNOTPP div.sc-1teo54s-2.fZIJcI div.sc-1teo54s-3.etWhyV',
+		async (ranks) => {
+			return ranks.map((index) => (index as HTMLElement).innerText)
 		}
 	)
 
-	for (let i = 0; i < numberOfCoins; i++) {
+	// splits the url at the identifier for each coin
+	const ids = await page.$$eval(
+		'div.sc-16r8icm-0.escjiH a.cmc-link',
+		async (urls) => {
+			const fullUrls = urls.map((index) => (index as HTMLLinkElement).href)
+			let splitUrls = []
+
+			for (let urls of fullUrls) {
+				const split = urls.split('/')
+
+				splitUrls.push(split[4])
+			}
+
+			return splitUrls
+		}
+	)
+
+	for (let i = 0; i < coinCount; i++) {
 		const coin = {
 			image: images[i],
 			name: {
@@ -122,27 +146,26 @@ const scraper = async () => {
 				symbol: symbols[i],
 			},
 			price: prices[i],
-			priceChange: {
-				oneHour: priceChange_1hr[i],
-				oneDay: priceChange_24hr[i],
-				sevenDays: priceChange_7d[i],
+			priceHistory: {
+				hour: priceChanges[i][0],
+				day: priceChanges[i][1],
+				week: priceChanges[i][2],
 			},
 			marketCap: marketCaps[i],
 			dayVolume: {
 				USD: dayVolumeUSD[i],
 				coin: dayVolumeCoin[i],
 			},
-			circulation: circulations[i],
 			rank: ranks[i],
-			url: urls[i],
+			circulation: circulations[i],
+			id: ids[i],
 		}
 
 		coinsCollection.push(coin)
 	}
 
-	await fs.writeFile('coins.json', JSON.stringify(coinsCollection))
-
 	await browser.close()
+	return coinsCollection
 }
 
-scraper()
+// scrapeAllCoins(100)
