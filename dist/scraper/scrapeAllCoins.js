@@ -57,8 +57,15 @@ const scrapeAllCoins = async (coinCount) => {
     const ranks = await page.$$eval('tbody tr td div.sc-16r8icm-0.escjiH a.cmc-link div.sc-16r8icm-0.sc-1teo54s-0.dBKWCw div.sc-16r8icm-0.sc-1teo54s-1.dNOTPP div.sc-1teo54s-2.fZIJcI div.sc-1teo54s-3.etWhyV', async (ranks) => {
         return ranks.map((index) => index.innerText);
     });
-    const urls = await page.$$eval('div.sc-16r8icm-0.escjiH a.cmc-link', async (urls) => {
-        return urls.map((index) => index.href);
+    // splits the url at the identifier for each coin
+    const ids = await page.$$eval('div.sc-16r8icm-0.escjiH a.cmc-link', async (urls) => {
+        const fullUrls = urls.map((index) => index.href);
+        let splitUrls = [];
+        for (let urls of fullUrls) {
+            const split = urls.split('/');
+            splitUrls.push(split[4]);
+        }
+        return splitUrls;
     });
     for (let i = 0; i < coinCount; i++) {
         const coin = {
@@ -80,7 +87,7 @@ const scrapeAllCoins = async (coinCount) => {
             },
             rank: ranks[i],
             circulation: circulations[i],
-            url: urls[i],
+            id: ids[i],
         };
         coinsCollection.push(coin);
     }
@@ -88,4 +95,4 @@ const scrapeAllCoins = async (coinCount) => {
     return coinsCollection;
 };
 exports.scrapeAllCoins = scrapeAllCoins;
-(0, exports.scrapeAllCoins)(100);
+// scrapeAllCoins(100)

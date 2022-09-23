@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer'
-import fs from 'fs/promises'
 
 type Coin = {
 	image: string
@@ -20,7 +19,7 @@ type Coin = {
 	}
 	rank: string
 	circulation: string
-	url: string
+	id: string
 }
 
 export const scrapeAllCoins = async (coinCount: number) => {
@@ -122,10 +121,20 @@ export const scrapeAllCoins = async (coinCount: number) => {
 		}
 	)
 
-	const urls = await page.$$eval(
+	// splits the url at the identifier for each coin
+	const ids = await page.$$eval(
 		'div.sc-16r8icm-0.escjiH a.cmc-link',
 		async (urls) => {
-			return urls.map((index) => (index as HTMLLinkElement).href)
+			const fullUrls = urls.map((index) => (index as HTMLLinkElement).href)
+			let splitUrls = []
+
+			for (let urls of fullUrls) {
+				const split = urls.split('/')
+
+				splitUrls.push(split[4])
+			}
+
+			return splitUrls
 		}
 	)
 
@@ -149,7 +158,7 @@ export const scrapeAllCoins = async (coinCount: number) => {
 			},
 			rank: ranks[i],
 			circulation: circulations[i],
-			url: urls[i],
+			id: ids[i],
 		}
 
 		coinsCollection.push(coin)
@@ -159,4 +168,4 @@ export const scrapeAllCoins = async (coinCount: number) => {
 	return coinsCollection
 }
 
-scrapeAllCoins(100)
+// scrapeAllCoins(100)
