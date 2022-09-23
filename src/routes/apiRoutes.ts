@@ -8,7 +8,7 @@ import {
 const router = Router()
 
 router.route('/all-coins').get(get_all_coins)
-router.route('/top-50').get(get_top_fifty_coins)
-router.route('/coin/:id').get(get_single_coin)
+router.route('/half-coins').get(get_top_fifty_coins)
+router.route('/:id').get(get_single_coin)
 
 export default router
