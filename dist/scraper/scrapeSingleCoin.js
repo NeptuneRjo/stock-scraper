@@ -9,14 +9,14 @@ const promises_1 = __importDefault(require("fs/promises"));
 const scrapeSingleCoin = async (url) => {
     const browser = await puppeteer_1.default.launch();
     const page = await browser.newPage();
-    await page.goto(url);
+    await page.goto(`https://coinmarketcap.com/currencies/${url}/`);
     const image = await page.$eval('div.sc-16r8icm-0.gpRPnR.nameHeader img', async (image) => {
         return image.src;
     });
     const rank = await page.$eval('div.namePill.namePillPrimary', async (rank) => {
         return rank.innerText;
     });
-    // this selector returns a name and symbol, so this splits at \n and
+    // selector returns a name and symbol, so this splits at \n and
     // returns both in an array
     const name = await page.$eval('h2.sc-1q9q90x-0.jCInrl.h1', async (name) => {
         const fullName = name.innerText;
@@ -76,4 +76,4 @@ const scrapeSingleCoin = async (url) => {
     await browser.close();
 };
 exports.scrapeSingleCoin = scrapeSingleCoin;
-(0, exports.scrapeSingleCoin)('https://coinmarketcap.com/currencies/bitcoin/');
+// scrapeSingleCoin('bitcoin')
