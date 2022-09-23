@@ -169,4 +169,4 @@ export const scrapeAllCoins = async (coinCount: number) => {
 	return coinsCollection
 }
 
-scrapeAllCoins(100)
+// scrapeAllCoins(100)
