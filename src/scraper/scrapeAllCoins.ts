@@ -125,7 +125,16 @@ export const scrapeAllCoins = async (coinCount: number) => {
 	const urls = await page.$$eval(
 		'div.sc-16r8icm-0.escjiH a.cmc-link',
 		async (urls) => {
-			return urls.map((index) => (index as HTMLLinkElement).href)
+			const fullUrls = urls.map((index) => (index as HTMLLinkElement).href)
+			let splitUrls = []
+
+			for (let urls of fullUrls) {
+				const split = urls.split('/')
+
+				splitUrls.push(split[4])
+			}
+
+			return splitUrls
 		}
 	)
 
