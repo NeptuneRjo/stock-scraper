@@ -20,7 +20,7 @@ type Coin = {
 	}
 	rank: string
 	circulation: string
-	url: string
+	id: string
 }
 
 export const scrapeAllCoins = async (coinCount: number) => {
@@ -122,7 +122,8 @@ export const scrapeAllCoins = async (coinCount: number) => {
 		}
 	)
 
-	const urls = await page.$$eval(
+	// splits the url at the identifier for each coin
+	const ids = await page.$$eval(
 		'div.sc-16r8icm-0.escjiH a.cmc-link',
 		async (urls) => {
 			const fullUrls = urls.map((index) => (index as HTMLLinkElement).href)
@@ -158,7 +159,7 @@ export const scrapeAllCoins = async (coinCount: number) => {
 			},
 			rank: ranks[i],
 			circulation: circulations[i],
-			url: urls[i],
+			id: ids[i],
 		}
 
 		coinsCollection.push(coin)
